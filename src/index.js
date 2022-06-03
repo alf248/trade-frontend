@@ -8,19 +8,31 @@ import { BrowserRouter, Routes, Route } from "react-router-dom"
 import Offers from "./Offer/Offers"
 import OffersIndex from "./Offer/OffersIndex"
 import Offer from "./Offer/Offer"
-import OfferNew from "./OfferNew/OfferNew"
+import NewOffer from "./Offer/NewOffer"
 import User from "./User/User"
 import Users from "./User/Users"
 import UsersIndex from "./User/UsersIndex"
 import Login from "./User/Login"
-import About from "./Main/About"
+import About from "./Misc/About"
+import Tos from "./Misc/Tos"
+import Privacy from "./Misc/Privacy"
 import Cart from "./Cart/Cart"
 import Frontpage from "./Main/Frontpage"
 import PaySuccess from "./Cart/PaySuccess"
 import Orders from "./Orders/Orders"
-import { MainContext } from './MainContext.js'
-import PostData from './javascript/PostData.js'
-import CartMethods from './javascript/CartMethods.js'
+import { MainContext } from './Main/MainContext.js'
+import PostData from './Main/PostData.js'
+import CartMethods from './Main/CartMethods.js'
+
+import { initializeApp } from "firebase/app"
+import { getAnalytics } from "firebase/analytics"
+import { getAuth } from "firebase/auth"
+
+//import { firebase } from "firebase"
+//import { firebaseui } from "firebaseui"
+import firebase from 'firebase/compat/app'
+import 'firebase/compat/auth'
+import 'firebase/compat/firestore'
 
 
 
@@ -41,6 +53,51 @@ class Index extends React.Component {
         this.cartMethods = new CartMethods(this)
 
 		this.state = { username: "", refreshCount: 0, cart: [], mainContext: { signedUser: "", Post: this.post  } }
+
+		const login = this.login
+		const logout = this.logout
+
+		firebase.auth().onAuthStateChanged(function(user) {
+
+			if (user) {
+				// User is signed in, see docs for a list of available properties
+				// https://firebase.google.com/docs/reference/js/firebase.User
+		
+				console.log("onAuthStateChanged: user:", user)
+				
+				//user.getIdToken().then((r) => {console.log("Token", r)})
+
+
+				const data = user.providerData[0]
+				const email = data.email
+				const displayName = data.displayName
+
+				if (false) {
+					console.log("user object:",user)
+					console.log("user email:",email)
+					console.log("user displayName:",displayName)
+				}
+				
+				firebase.auth().currentUser.getIdToken(/* forceRefresh */ true).then(function(idToken) {
+					// Send token to your backend via HTTPS
+					
+					//console.log("onAuthStateChanged got idToken", idToken)
+					login(email, idToken)
+					
+				}).catch(function(error) {
+					// Handle error
+				})
+
+			}
+			else {
+				// User is signed out
+				console.log("onAuthStateChanged: signed out")
+				logout()
+			}
+		
+			}
+		)
+	
 	}
 
 	componentDidMount() {
@@ -56,17 +113,17 @@ class Index extends React.Component {
 		return new PostData(urlpath, this.logout)
 	}
 
-	// refresh state to create an update
+	// refresh state to create an update (use forceUpdate instead?)
 	refresh() {
 		this.setState({refreshCount: this.state.refreshCount})
 	}
 
-	login(user) {
-		console.log("LOGIN", user.name)
-		sessionStorage.setItem('user', user.name)
-		sessionStorage.setItem('email', user.email)
-		sessionStorage.setItem('token', user.token)
-		this.#setUser(user.name)
+	login(email, token) {
+		console.log("LOGIN", email)
+		//sessionStorage.setItem('user', user.name)
+		sessionStorage.setItem('email', email)
+		sessionStorage.setItem('token', token)
+		this.#setUser(email)
 	}
 
 	logout() {
@@ -75,6 +132,12 @@ class Index extends React.Component {
 		sessionStorage.removeItem('email')
 		sessionStorage.removeItem('token')
 		this.#setUser("")
+
+		firebase.auth().signOut().then(function() {
+			console.log('Signed Out');
+		}, function(error) {
+			console.error('Sign Out Error', error);
+		});
 	}
 
 	#setUser(username) {
@@ -104,22 +167,25 @@ class Index extends React.Component {
 			
 					<Route path="users" element={<Users />} >
 						<Route index element={<UsersIndex />} />
-						<Route path=":username" element={<User />} />
-						<Route path=":username/orders" element={<Orders />} />
+						<Route path=":id" element={<User />} />
 					</Route>
 			
 					<Route path="offers" element={<Offers />} >
 						<Route index element={<OffersIndex />} />
 						<Route path=":id" element={<Offer cartMethods={this.cartMethods} />} />
-						<Route path="new" element={<OfferNew />} />
+						<Route path="new" element={<NewOffer />} />
 					</Route>
-			
+
+					<Route path="/orders" element={<Orders />} />
+
 					<Route path="login" element={<Login login={this.login} />} />
 
 					<Route path="cart" element={<Cart cart={this.state.cart} cartMethods={this.cartMethods} />} />
 
 					<Route path="success" element={<PaySuccess username={username} />} />
 					<Route path="about" element={<About username={username} />} />
+					<Route path="tos" element={<Tos username={username} />} />
+					<Route path="privacy" element={<Privacy username={username} />} />
 			
 				</Route>
 			

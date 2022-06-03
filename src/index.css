@@ -14,13 +14,12 @@ code {
     monospace;
 }
 
-/*
-COLOR PALETTE
-https://colorhunt.co/palette/4d77ff56bbf15ee6ebf2fa5a
-*/
-
 .price {
   font-size: 1.5em
+}
+
+.border-style {
+  border-radius: 2px !important;
 }
 
 .squareButton {
@@ -50,8 +49,7 @@ https://colorhunt.co/palette/4d77ff56bbf15ee6ebf2fa5a
 }
 
 .cat:hover {
-  background-color: #eee !important;
-  background-color: #f7fab0 !important;
+  background-color: #afcbFF !important;
 }
 
 .color-plate-grey {
@@ -60,6 +58,7 @@ https://colorhunt.co/palette/4d77ff56bbf15ee6ebf2fa5a
 
 .color-secondary {
   background-color: #f7fab0 !important;
+  background-color: #afcbFF !important;
 }
 
 .navbar-link-login {
@@ -68,7 +67,7 @@ https://colorhunt.co/palette/4d77ff56bbf15ee6ebf2fa5a
 
 @font-face {
   font-family: 'Copperplate';
-  src: local('Copperplate'), url(\xfonts/OPTICopperplate.otf) format('opentype');
+  src: local('Copperplate'), url(assets/xfonts/OPTICopperplate.otf) format('opentype');
   /* other formats include: 'woff2', 'truetype, 'opentype',
                             'embedded-opentype', and 'svg' */
 }
